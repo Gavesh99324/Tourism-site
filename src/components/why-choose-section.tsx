@@ -4,7 +4,10 @@ import { SectionReveal } from "@/components/section-reveal";
 
 export function WhyChooseSection() {
   return (
-    <SectionReveal className="overflow-hidden rounded-[32px] bg-white p-6 md:p-10">
+    <SectionReveal
+      id="about"
+      className="overflow-hidden rounded-[32px] bg-white p-6 md:p-10"
+    >
       <section>
         <div className="grid items-center gap-8 md:grid-cols-2">
           <div className="space-y-6">

@@ -9,7 +9,10 @@ const stats = [
 
 export function SuccessSection() {
   return (
-    <SectionReveal className="space-y-6 rounded-[32px] border border-[#e6e9f0] bg-white p-6 md:p-10">
+    <SectionReveal
+      id="success"
+      className="space-y-6 rounded-[32px] border border-[#e6e9f0] bg-white p-6 md:p-10"
+    >
       <section>
         <h2 className="text-5xl font-bold md:text-6xl">Our Success</h2>
         <p className="max-w-5xl text-2xl text-[#273344]">
