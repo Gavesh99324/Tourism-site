@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f8fb;
+  --foreground: #101722;
+  --muted: #6b7280;
+  --surface: #ffffff;
+  --line: #e7eaf0;
+  --mint: #15bf61;
+  --mint-soft: #e6f5ec;
+  --ink: #09111f;
+  --accent: #0070f3;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-sora);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-manrope), sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sora), sans-serif;
+}
+
+::selection {
+  color: #0c1812;
+  background: #bdf2d2;
+}
+
+.soft-grid {
+  background-image: radial-gradient(
+    rgba(17, 24, 39, 0.06) 1px,
+    transparent 1px
+  );
+  background-size: 16px 16px;
+}
+
+.glass {
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.card-shadow {
+  box-shadow: 0 12px 32px rgba(16, 23, 34, 0.08);
+}
+
+.fade-in {
+  animation: fadeInUp 600ms ease both;
+}
+
+.section-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 600ms ease,
+    transform 600ms ease;
+  will-change: opacity, transform;
+}
+
+.section-reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.carousel-scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.carousel-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
