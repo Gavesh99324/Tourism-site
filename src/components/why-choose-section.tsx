@@ -6,26 +6,26 @@ export function WhyChooseSection() {
   return (
     <SectionReveal
       id="about"
-      className="overflow-hidden rounded-[32px] bg-white p-6 md:p-10"
+      className="overflow-hidden rounded-[32px] bg-white p-6 md:p-8 lg:p-10"
     >
       <section>
         <div className="grid items-center gap-8 md:grid-cols-2">
           <div className="space-y-6">
-            <h2 className="text-4xl font-bold leading-tight md:text-6xl">
+            <h2 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
               Why Choose Olanka ?
             </h2>
-            <p className="text-2xl leading-relaxed text-[#273344]">
+            <p className="text-lg leading-relaxed text-[#273344] sm:text-xl lg:text-2xl">
               One of the best ways to travel is by relying on local expertise.
               Only a Rome local knows the best gelato spots, or a Bangkok local
               the best street food markets. At Olanka Travels, we&apos;re here
               to help you experience your dream destination by connecting you
               with our local destination experts.
             </p>
-            <button className="rounded-full bg-black px-8 py-3 text-2xl font-semibold text-white">
+            <button className="rounded-full bg-black px-8 py-3 text-lg font-semibold text-white sm:text-xl lg:text-2xl">
               Our Story
             </button>
           </div>
-          <div className="relative h-[420px] overflow-hidden rounded-[24px] md:h-[580px]">
+          <div className="relative h-[360px] overflow-hidden rounded-[24px] md:h-[480px] lg:h-[580px]">
             <Image
               src="https://www.olankatravels.com/assets/home/hero-ind.png"
               alt="Olanka team"

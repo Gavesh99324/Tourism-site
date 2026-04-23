@@ -48,14 +48,16 @@ const plans = [
 
 export function PlansSection() {
   return (
-    <SectionReveal className="space-y-6 rounded-[32px] border border-[#e6e9f0] bg-white p-6 md:p-10">
+    <SectionReveal className="space-y-6 rounded-[32px] border border-[#e6e9f0] bg-white p-6 md:p-8 lg:p-10">
       <section>
-        <h2 className="text-5xl font-bold md:text-6xl">3 Vacation Options</h2>
-        <p className="text-2xl text-[#273344]">
+        <h2 className="text-4xl font-bold sm:text-5xl lg:text-6xl">
+          3 Vacation Options
+        </h2>
+        <p className="text-lg text-[#273344] sm:text-xl lg:text-2xl">
           We will provide a selection of 3 different tour types to suit your
           preferences.
         </p>
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
           {plans.map((plan, index) => (
             <article
               key={plan.name}
@@ -64,9 +66,13 @@ export function PlansSection() {
               <p className="inline-block rounded-full bg-black px-4 py-1 text-sm font-bold uppercase tracking-wide text-white">
                 {plan.badge}
               </p>
-              <h3 className="mt-4 text-3xl font-bold">{plan.name}</h3>
-              <p className="mt-2 text-xl text-[#273344]">{plan.price}</p>
-              <ul className="mt-5 space-y-2 text-lg text-[#2f3948]">
+              <h3 className="mt-4 text-2xl font-bold sm:text-3xl">
+                {plan.name}
+              </h3>
+              <p className="mt-2 text-lg text-[#273344] sm:text-xl">
+                {plan.price}
+              </p>
+              <ul className="mt-5 space-y-2 text-base text-[#2f3948] sm:text-lg">
                 {plan.points.map((point) => (
                   <li key={point}>• {point}</li>
                 ))}

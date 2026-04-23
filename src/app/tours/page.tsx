@@ -1,10 +1,36 @@
+"use client";
+
 import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { useEffect, useState } from "react";
 
 import { FloatingActions } from "@/components/floating-actions";
 import { FooterSection } from "@/components/footer-section";
 import { QuoteSection } from "@/components/quote-section";
 import { SectionReveal } from "@/components/section-reveal";
 import { SiteHeader } from "@/components/site-header";
+
+type TripType =
+  | "Tailor Made Tours"
+  | "Fixed Departures"
+  | "Getaway"
+  | "Fixed Tours";
+
+type TourItem = {
+  destination: string;
+  title: string;
+  price: string;
+  days: number;
+  tripType: TripType;
+  themes: string[];
+  image: string;
+  details?: string;
+  rating?: string;
+  isSpecialOffer?: boolean;
+};
+
+const dayMarks = [3, 6, 9, 12, 15];
 
 const destinations = [
   "Sri Lanka",
@@ -17,7 +43,7 @@ const destinations = [
   "Malaysia",
 ];
 
-const tripTypes = [
+const tripTypes: TripType[] = [
   "Tailor Made Tours",
   "Fixed Departures",
   "Getaway",
@@ -33,11 +59,14 @@ const tourThemes = [
   "Photography",
 ];
 
-const tailorMadeTours = [
+const tailorMadeTours: TourItem[] = [
   {
     destination: "Sri Lanka",
     title: "10 Days - Sri Lanka Dream Route",
     price: "LKR 474,639",
+    days: 10,
+    tripType: "Tailor Made Tours",
+    themes: ["Adventure", "Wildlife"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/maldives-min.jpg",
   },
@@ -45,6 +74,9 @@ const tailorMadeTours = [
     destination: "Sri Lanka",
     title: "A 12-Day Island Adventure Awaits",
     price: "LKR 601,209",
+    days: 12,
+    tripType: "Tailor Made Tours",
+    themes: ["Adventure", "Photography"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/Cambodia-min.jpg",
   },
@@ -52,6 +84,9 @@ const tailorMadeTours = [
     destination: "Sri Lanka",
     title: "14 Days - Sri Lanka Intimate Trails",
     price: "LKR 933,456",
+    days: 14,
+    tripType: "Tailor Made Tours",
+    themes: ["Honeymoon", "Adventure"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/Singapore-min.jpg",
   },
@@ -59,6 +94,9 @@ const tailorMadeTours = [
     destination: "Vietnam",
     title: "4 Days Hanoi Tour Package",
     price: "LKR 142,392",
+    days: 4,
+    tripType: "Tailor Made Tours",
+    themes: ["Adventure", "Photography"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/vietnam-min.jpg",
   },
@@ -66,6 +104,9 @@ const tailorMadeTours = [
     destination: "Malaysia",
     title: "6 Days of Malaysian Magic",
     price: "LKR 199,348",
+    days: 6,
+    tripType: "Tailor Made Tours",
+    themes: ["Golf", "Adventure"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/Indonesia-min.jpg",
   },
@@ -73,12 +114,15 @@ const tailorMadeTours = [
     destination: "Dubai",
     title: "6 Days Dubai Dreams",
     price: "LKR 275,291",
+    days: 6,
+    tripType: "Tailor Made Tours",
+    themes: ["Adventure", "Photography"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/Dubai-min.jpg",
   },
 ];
 
-const getawayTours = [
+const getawayTours: TourItem[] = [
   {
     destination: "Maldives",
     title: "Triton Prestige Maafushi",
@@ -86,6 +130,9 @@ const getawayTours = [
     details:
       "Triton Prestige Seaview & Spa is a newly built 4-star beachfront hotel, featuring modern facilities and a range of luxurious accommodations. Our hotel offers deluxe rooms, king suites, honeymoon suites, and super deluxe rooms, ensuring that there is something for every type of traveler.",
     price: "181,945",
+    days: 4,
+    tripType: "Getaway",
+    themes: ["Honeymoon", "Adventure"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/maldives-min.jpg",
   },
@@ -94,8 +141,11 @@ const getawayTours = [
     title: "Local Island Stay",
     rating: "4",
     details:
-      "Maafushi Island is one of the most popular local islands in the Maldives, known for its affordability, beautiful beaches, and vibrant atmosphere. It’s an excellent choice for travelers looking to experience the Maldives without the high costs of luxury resorts.",
+      "Maafushi Island is one of the most popular local islands in the Maldives, known for its affordability, beautiful beaches, and vibrant atmosphere. It is an excellent choice for travelers looking to experience the Maldives without high resort costs.",
     price: "197,766",
+    days: 4,
+    tripType: "Getaway",
+    themes: ["Adventure", "Photography"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/maldives-min.jpg",
   },
@@ -104,8 +154,11 @@ const getawayTours = [
     title: "Cinnamon Dhonveli",
     rating: "4",
     details:
-      "Nestled in the heart of the Indian Ocean, Cinnamon Dhonveli Maldives offers a tropical paradise where luxury meets nature. Located just a 30-minute speedboat ride from Velana International Airport, this stunning resort boasts crystal-clear turquoise waters, powdery white sands, and an abundance of marine life.",
+      "Nestled in the heart of the Indian Ocean, Cinnamon Dhonveli Maldives offers a tropical paradise where luxury meets nature with crystal-clear waters and marine life.",
     price: "262,633",
+    days: 4,
+    tripType: "Getaway",
+    themes: ["Honeymoon", "Adventure"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/maldives-min.jpg",
   },
@@ -114,8 +167,11 @@ const getawayTours = [
     title: "Hard Rock Maldives",
     rating: "5",
     details:
-      "A MELODY YOU CAN’T SHAKE, AND A TROPICAL EXPERIENCE YOU WON’T FORGET. Invite the entire crew, and a few plus ones, to Hard Rock Hotel Maldives for an all-inclusive tropical experience.",
+      "A MELODY YOU CANNOT SHAKE, AND A TROPICAL EXPERIENCE YOU WON'T FORGET. Bring the whole crew for an all-inclusive island experience.",
     price: "264,216",
+    days: 4,
+    tripType: "Getaway",
+    themes: ["Honeymoon", "Adventure"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/maldives-min.jpg",
   },
@@ -126,6 +182,10 @@ const getawayTours = [
     details:
       "Grand Park Kodhipparu, Maldives, a luxury resort in the North Male Atoll. This island paradise boasts stunning villas, pristine beaches, and breathtaking scenery.",
     price: "363,890",
+    days: 4,
+    tripType: "Getaway",
+    themes: ["Honeymoon", "Photography"],
+    isSpecialOffer: true,
     image:
       "https://www.olankatravels.com/assets/home/destinations/maldives-min.jpg",
   },
@@ -134,10 +194,26 @@ const getawayTours = [
     title: "Meeru Island Resort",
     rating: "4",
     details:
-      "Discover the original Maldivian culture all around the island including a visit to our state of the art island museum. Create magical moments with your loved ones.",
+      "Discover original Maldivian culture all around the island and create magical moments with your loved ones.",
     price: "379,078",
+    days: 4,
+    tripType: "Getaway",
+    themes: ["Honeymoon", "Adventure"],
     image:
       "https://www.olankatravels.com/assets/home/destinations/maldives-min.jpg",
+  },
+];
+
+const fixedDepartureTours: TourItem[] = [
+  {
+    destination: "Sri Lanka",
+    title: "14 Days Journey Culture and Nature",
+    price: "844,857",
+    days: 14,
+    tripType: "Fixed Departures",
+    themes: ["Wildlife", "Adventure"],
+    image:
+      "https://www.olankatravels.com/assets/home/destinations/Singapore-min.jpg",
   },
 ];
 
@@ -202,62 +278,286 @@ const vacationOptions = [
   },
 ];
 
-export default function ToursPage() {
+function toggleValue<T extends string>(
+  value: T,
+  list: T[],
+  setList: (next: T[]) => void,
+) {
+  if (list.includes(value)) {
+    setList(list.filter((item) => item !== value));
+    return;
+  }
+
+  setList([...list, value]);
+}
+
+function parseListParam<T extends string>(
+  value: string | null,
+  allowed: readonly T[],
+) {
+  if (!value) {
+    return [] as T[];
+  }
+
+  const allowedSet = new Set(allowed);
+
+  return value
+    .split(",")
+    .map((entry) => decodeURIComponent(entry.trim()))
+    .filter((entry): entry is T => allowedSet.has(entry as T));
+}
+
+function parseDaysParam(value: string | null) {
+  const parsed = Number(value);
+
+  if (!Number.isFinite(parsed) || !dayMarks.includes(parsed)) {
+    return 15;
+  }
+
+  return parsed;
+}
+
+function ToursContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [selectedDestinations, setSelectedDestinations] = useState<string[]>(
+    () => parseListParam(searchParams.get("dest"), destinations),
+  );
+  const [selectedTripTypes, setSelectedTripTypes] = useState<TripType[]>(() =>
+    parseListParam(searchParams.get("types"), tripTypes),
+  );
+  const [selectedThemes, setSelectedThemes] = useState<string[]>(() =>
+    parseListParam(searchParams.get("themes"), tourThemes),
+  );
+  const [maxDays, setMaxDays] = useState(() =>
+    parseDaysParam(searchParams.get("days")),
+  );
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (selectedDestinations.length > 0) {
+      params.set("dest", selectedDestinations.join(","));
+    }
+
+    if (selectedTripTypes.length > 0) {
+      params.set("types", selectedTripTypes.join(","));
+    }
+
+    if (selectedThemes.length > 0) {
+      params.set("themes", selectedThemes.join(","));
+    }
+
+    if (maxDays !== 15) {
+      params.set("days", String(maxDays));
+    }
+
+    const nextQuery = params.toString();
+    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+
+    router.replace(nextUrl, { scroll: false });
+  }, [
+    maxDays,
+    pathname,
+    router,
+    selectedDestinations,
+    selectedThemes,
+    selectedTripTypes,
+  ]);
+
+  const maxPercent = ((maxDays - 3) / 12) * 100;
+
+  const matchesFilters = (tour: TourItem) => {
+    const destinationMatch =
+      selectedDestinations.length === 0 ||
+      selectedDestinations.includes(tour.destination);
+    const tripTypeMatch =
+      selectedTripTypes.length === 0 ||
+      selectedTripTypes.includes(tour.tripType);
+    const themeMatch =
+      selectedThemes.length === 0 ||
+      tour.themes.some((theme) => selectedThemes.includes(theme));
+    const daysMatch = tour.days <= maxDays;
+
+    return destinationMatch && tripTypeMatch && themeMatch && daysMatch;
+  };
+
+  const filteredTailorMade = tailorMadeTours.filter(matchesFilters);
+  const filteredGetaway = getawayTours.filter(matchesFilters);
+  const filteredFixedDepartures = fixedDepartureTours.filter(matchesFilters);
+
+  const showTailorSection =
+    selectedTripTypes.length === 0 ||
+    selectedTripTypes.includes("Tailor Made Tours");
+  const showGetawaySection =
+    selectedTripTypes.length === 0 || selectedTripTypes.includes("Getaway");
+  const showFixedDeparturesSection =
+    selectedTripTypes.length === 0 ||
+    selectedTripTypes.includes("Fixed Departures");
+
+  const hasActiveFilters =
+    selectedDestinations.length > 0 ||
+    selectedTripTypes.length > 0 ||
+    selectedThemes.length > 0 ||
+    maxDays !== 15;
+
+  const resetFilters = () => {
+    setSelectedDestinations([]);
+    setSelectedTripTypes([]);
+    setSelectedThemes([]);
+    setMaxDays(15);
+  };
+
   return (
     <div className="relative min-h-screen soft-grid text-[#101722]">
+      <SiteHeader />
       <div className="mx-auto max-w-[1280px] px-3 pb-20 pt-0 md:px-5">
-        <SiteHeader />
-
-        <main className="space-y-8 pt-8 md:space-y-12">
+        <main className="space-y-8 pt-6 md:space-y-12 md:pt-8">
           <SectionReveal className="rounded-[24px] bg-[#f6f7fb] p-5 md:p-8">
             <section>
-              <p className="text-lg text-[#738093]">Home › Holidays & Tours</p>
-              <h1 className="mt-6 text-5xl font-bold md:text-7xl">
+              <p className="text-sm text-[#738093] md:text-lg">
+                🏠 Home › Holidays & Tours
+              </p>
+              <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl md:mt-6 md:text-6xl lg:text-7xl">
                 Tours & Destinations
               </h1>
             </section>
           </SectionReveal>
 
-          <section className="grid gap-5 lg:grid-cols-[300px_1fr]">
+          <section className="grid gap-5 lg:grid-cols-[270px_1fr] xl:grid-cols-[300px_1fr]">
             <aside className="h-fit rounded-2xl border border-[#e4e8f0] bg-white lg:sticky lg:top-[122px]">
-              <div className="border-b border-[#e8ebf2] p-5">
-                <h3 className="text-5 font-bold text-[26px]">Number of Days</h3>
-                <div className="mt-5 h-4 rounded-full bg-[#0f1f33]" />
-                <p className="mt-2 text-2xl tracking-[0.4em] text-[#101722]">
-                  3 6 9 12 15
-                </p>
+              <div className="border-b border-[#e8ebf2] p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-2xl font-bold sm:text-3xl md:text-4xl">
+                    Number of Days
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    disabled={!hasActiveFilters}
+                    className="inline-flex min-h-10 items-center rounded-lg border border-[#d7dbe4] px-3 py-1 text-xs font-semibold text-[#2d3b52] disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+
+                <div className="relative mt-6">
+                  <div className="h-4 rounded-full bg-[#dfdfe4]" />
+                  <div
+                    className="absolute left-0 top-0 h-4 rounded-full bg-[#0f1f33]"
+                    style={{ width: `${maxPercent}%` }}
+                  />
+
+                  <span className="absolute top-1/2 h-10 w-10 -translate-y-1/2 rounded-full border-4 border-[#1a2535] bg-white" />
+                  <span
+                    className="absolute top-1/2 h-10 w-10 -translate-y-1/2 rounded-full border-4 border-[#1a2535] bg-white"
+                    style={{
+                      left: `clamp(0px, calc(${maxPercent}% - 1.25rem), calc(100% - 2.5rem))`,
+                    }}
+                  />
+
+                  <input
+                    type="range"
+                    min={3}
+                    max={15}
+                    step={3}
+                    value={maxDays}
+                    onChange={(event) => setMaxDays(Number(event.target.value))}
+                    className="absolute inset-0 h-10 cursor-pointer opacity-0"
+                    aria-label="Number of days"
+                  />
+                </div>
+
+                <div className="mt-4 grid grid-cols-5 text-center text-xl sm:text-2xl md:text-3xl">
+                  {dayMarks.map((mark) => (
+                    <button
+                      key={mark}
+                      type="button"
+                      onClick={() => setMaxDays(mark)}
+                      className={`min-h-10 py-1 ${mark <= maxDays ? "text-[#101722]" : "text-[#9aa3b1]"}`}
+                    >
+                      {mark}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="border-b border-[#e8ebf2] p-5">
-                <h3 className="text-[38px] font-bold">Destination</h3>
-                <div className="mt-4 space-y-2 text-[34px]">
+              <div className="border-b border-[#e8ebf2] p-6">
+                <h3 className="text-2xl font-bold sm:text-3xl md:text-4xl">
+                  Destination
+                </h3>
+                <div className="mt-4 space-y-2 text-lg sm:text-xl md:text-2xl">
                   {destinations.map((item) => (
-                    <label key={item} className="flex items-center gap-3">
-                      <input type="checkbox" className="h-7 w-7 rounded" />
+                    <label
+                      key={item}
+                      className="flex min-h-11 cursor-pointer items-center gap-3 py-1"
+                    >
+                      <input
+                        type="checkbox"
+                        className="h-7 w-7 rounded"
+                        checked={selectedDestinations.includes(item)}
+                        onChange={() =>
+                          toggleValue(
+                            item,
+                            selectedDestinations,
+                            setSelectedDestinations,
+                          )
+                        }
+                      />
                       {item}
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="border-b border-[#e8ebf2] p-5">
-                <h3 className="text-[38px] font-bold">Trip Type</h3>
-                <div className="mt-4 space-y-2 text-[34px]">
+              <div className="border-b border-[#e8ebf2] p-6">
+                <h3 className="text-2xl font-bold sm:text-3xl md:text-4xl">
+                  Trip Type
+                </h3>
+                <div className="mt-4 space-y-2 text-lg sm:text-xl md:text-2xl">
                   {tripTypes.map((item) => (
-                    <label key={item} className="flex items-center gap-3">
-                      <input type="checkbox" className="h-7 w-7 rounded" />
+                    <label
+                      key={item}
+                      className="flex min-h-11 cursor-pointer items-center gap-3 py-1"
+                    >
+                      <input
+                        type="checkbox"
+                        className="h-7 w-7 rounded"
+                        checked={selectedTripTypes.includes(item)}
+                        onChange={() =>
+                          toggleValue(
+                            item,
+                            selectedTripTypes,
+                            setSelectedTripTypes,
+                          )
+                        }
+                      />
                       {item}
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="p-5">
-                <h3 className="text-[38px] font-bold">Tour Theme</h3>
-                <div className="mt-4 space-y-2 text-[34px]">
+              <div className="p-6">
+                <h3 className="text-2xl font-bold sm:text-3xl md:text-4xl">
+                  Tour Theme
+                </h3>
+                <div className="mt-4 space-y-2 text-lg sm:text-xl md:text-2xl">
                   {tourThemes.map((item) => (
-                    <label key={item} className="flex items-center gap-3">
-                      <input type="checkbox" className="h-7 w-7 rounded" />
+                    <label
+                      key={item}
+                      className="flex min-h-11 cursor-pointer items-center gap-3 py-1"
+                    >
+                      <input
+                        type="checkbox"
+                        className="h-7 w-7 rounded"
+                        checked={selectedThemes.includes(item)}
+                        onChange={() =>
+                          toggleValue(item, selectedThemes, setSelectedThemes)
+                        }
+                      />
                       {item}
                     </label>
                   ))}
@@ -266,64 +566,147 @@ export default function ToursPage() {
             </aside>
 
             <div className="space-y-10">
-              <SectionReveal>
-                <section>
-                  <h2 className="text-5xl font-bold md:text-6xl">
-                    Tailor Made Tours
-                  </h2>
-                  <div className="mt-5 grid gap-5 xl:grid-cols-2">
-                    {tailorMadeTours.map((tour) => (
-                      <article
-                        key={tour.title}
-                        className="overflow-hidden rounded-[20px] border border-[#e6eaf0] bg-white"
-                      >
-                        <div className="relative h-[210px]">
-                          <Image
-                            src={tour.image}
-                            alt={tour.title}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 1280px) 100vw, 50vw"
-                          />
-                        </div>
-                        <div className="space-y-4 p-5">
-                          <div className="flex items-center justify-between">
-                            <span className="text-2xl font-medium text-[#3d82f0]">
-                              📍 {tour.destination}
-                            </span>
-                            <span className="rounded-xl bg-[#eaf0fb] px-4 py-1 text-xl">
-                              Tailor Made
-                            </span>
+              {showTailorSection ? (
+                <SectionReveal>
+                  <section>
+                    <h2 className="text-4xl font-bold sm:text-5xl md:text-6xl">
+                      Tailor Made Tours
+                    </h2>
+                    <div className="mt-5 grid gap-5 lg:grid-cols-2">
+                      {filteredTailorMade.map((tour) => (
+                        <article
+                          key={tour.title}
+                          className="overflow-hidden rounded-[20px] border border-[#e6eaf0] bg-white"
+                        >
+                          <div className="relative h-[210px]">
+                            <Image
+                              src={tour.image}
+                              alt={tour.title}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 1280px) 100vw, 50vw"
+                            />
                           </div>
-                          <h3 className="text-4xl font-bold">{tour.title}</h3>
-                          <div className="flex items-center justify-between text-2xl">
-                            <span className="text-[#55637b]">
-                              Starting From
-                            </span>
-                            <strong>{tour.price}</strong>
+                          <div className="space-y-4 p-5">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <span className="text-xl font-medium text-[#3d82f0] sm:text-2xl">
+                                📍 {tour.destination}
+                              </span>
+                              <span className="rounded-xl bg-[#eaf0fb] px-4 py-1 text-base sm:text-xl">
+                                Tailor Made
+                              </span>
+                            </div>
+                            <h3 className="text-2xl font-bold sm:text-3xl">
+                              {tour.title}
+                            </h3>
+                            <div className="flex items-center justify-between text-lg sm:text-2xl">
+                              <span className="text-[#55637b]">
+                                Starting From
+                              </span>
+                              <strong>{tour.price}</strong>
+                            </div>
                           </div>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                  <button className="mt-5 rounded-full border border-[#d7dbe4] px-8 py-3 text-xl font-semibold">
-                    Load More
-                  </button>
-                </section>
-              </SectionReveal>
+                        </article>
+                      ))}
+                    </div>
+                    {filteredTailorMade.length === 0 ? (
+                      <p className="mt-4 text-2xl text-[#55637b]">
+                        No Tailor Made tours match your current filters.
+                      </p>
+                    ) : null}
+                  </section>
+                </SectionReveal>
+              ) : null}
 
-              <SectionReveal>
-                <section>
-                  <h2 className="text-5xl font-bold md:text-6xl">
-                    Getaway Holidays
-                  </h2>
-                  <div className="mt-5 grid gap-5 xl:grid-cols-2">
-                    {getawayTours.map((tour) => (
+              {showGetawaySection ? (
+                <SectionReveal>
+                  <section>
+                    <h2 className="text-4xl font-bold sm:text-5xl md:text-6xl">
+                      Getaway Holidays
+                    </h2>
+                    <div className="mt-5 grid gap-5 lg:grid-cols-2">
+                      {filteredGetaway.map((tour) => (
+                        <article
+                          key={tour.title}
+                          className="overflow-hidden rounded-[20px] border border-[#e6eaf0] bg-white"
+                        >
+                          <div className="relative h-[210px]">
+                            <Image
+                              src={tour.image}
+                              alt={tour.title}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 1280px) 100vw, 50vw"
+                            />
+                          </div>
+                          <div className="space-y-3 p-5">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <span className="text-xl font-medium text-[#3d82f0] sm:text-2xl">
+                                📍 {tour.destination}
+                              </span>
+                              <span className="rounded-xl bg-[#eaf0fb] px-4 py-1 text-base sm:text-xl">
+                                Getaway
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <h3 className="text-2xl font-bold sm:text-3xl">
+                                {tour.title}
+                              </h3>
+                              <span className="shrink-0 rounded-xl bg-[#808287] px-3 py-1 text-base text-white sm:text-xl">
+                                {tour.rating} ★
+                              </span>
+                            </div>
+                            <p className="text-base text-[#55637b] sm:text-lg">
+                              {tour.details}
+                            </p>
+                            <button className="text-xl font-semibold text-[#3d82f0] sm:text-2xl">
+                              Show More
+                            </button>
+                            <p className="text-lg font-semibold sm:text-xl">
+                              4 Days 3 Nights
+                            </p>
+                            <p className="text-base text-[#55637b] sm:text-lg">
+                              Travel From Oct 1 - Dec 20, 2025
+                            </p>
+                            <p className="text-base text-[#55637b] sm:text-lg">
+                              Book before: Nov 30, 2025
+                            </p>
+                            {tour.isSpecialOffer ? (
+                              <p className="text-base text-[#55637b] sm:text-lg">
+                                Special offer: -40%
+                              </p>
+                            ) : null}
+                            <p className="text-base text-[#55637b] sm:text-lg">
+                              From LKR
+                            </p>
+                            <p className="text-3xl font-bold sm:text-4xl">
+                              {tour.price}
+                            </p>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                    {filteredGetaway.length === 0 ? (
+                      <p className="mt-4 text-2xl text-[#55637b]">
+                        No Getaway tours match your current filters.
+                      </p>
+                    ) : null}
+                  </section>
+                </SectionReveal>
+              ) : null}
+
+              {showFixedDeparturesSection ? (
+                <SectionReveal>
+                  <section>
+                    <h2 className="text-4xl font-bold sm:text-5xl md:text-6xl">
+                      Fixed Departures
+                    </h2>
+                    {filteredFixedDepartures.map((tour) => (
                       <article
                         key={tour.title}
-                        className="overflow-hidden rounded-[20px] border border-[#e6eaf0] bg-white"
+                        className="mt-5 max-w-[780px] overflow-hidden rounded-[20px] border border-[#e6eaf0] bg-white"
                       >
-                        <div className="relative h-[210px]">
+                        <div className="relative h-[230px]">
                           <Image
                             src={tour.image}
                             alt={tour.title}
@@ -333,139 +716,95 @@ export default function ToursPage() {
                           />
                         </div>
                         <div className="space-y-3 p-5">
-                          <div className="flex items-center justify-between">
-                            <span className="text-2xl font-medium text-[#3d82f0]">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <span className="text-xl font-medium text-[#3d82f0] sm:text-2xl">
                               📍 {tour.destination}
                             </span>
-                            <span className="rounded-xl bg-[#eaf0fb] px-4 py-1 text-xl">
-                              Getaway
+                            <span className="rounded-xl bg-[#eaf0fb] px-4 py-1 text-base sm:text-xl">
+                              Fixed Departures
                             </span>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-4xl font-bold">{tour.title}</h3>
-                            <span className="rounded-xl bg-[#808287] px-3 py-1 text-xl text-white">
-                              {tour.rating} ★
-                            </span>
-                          </div>
-                          <p className="text-xl text-[#55637b]">
-                            {tour.details}
+                          <h3 className="text-2xl font-bold sm:text-3xl">
+                            {tour.title}
+                          </h3>
+                          <p className="text-base text-[#55637b] sm:text-lg">
+                            04 Sept 2026. Space for 6 more
                           </p>
-                          <button className="text-2xl font-semibold text-[#3d82f0]">
-                            Show More
-                          </button>
-                          <p className="text-xl font-semibold">
-                            4 Days 3 Nights
+                          <p className="text-base text-[#55637b] sm:text-lg">
+                            Departing Date: 04 Sept 2026
                           </p>
-                          <p className="text-xl text-[#55637b]">
-                            Travel From Oct 1 - Dec 20, 2025
+                          <p className="text-base text-[#55637b] sm:text-lg">
+                            14 Days 13 Nights
                           </p>
-                          <p className="text-xl text-[#55637b]">
-                            Book before: Nov 30, 2025
+                          <p className="text-base text-[#55637b] sm:text-lg">
+                            Double Share Per Person
                           </p>
-                          <p className="text-xl text-[#55637b]">From LKR</p>
-                          <p className="text-5xl font-bold">{tour.price}</p>
+                          <p className="text-base text-[#55637b] sm:text-lg">
+                            Duration: {tour.days} Days
+                          </p>
+                          <p className="text-base text-[#55637b] sm:text-lg">
+                            From LKR
+                          </p>
+                          <p className="text-3xl font-bold sm:text-4xl">
+                            {tour.price}
+                          </p>
                         </div>
                       </article>
                     ))}
-                  </div>
-                  <button className="mt-5 rounded-full border border-[#d7dbe4] px-8 py-3 text-xl font-semibold">
-                    Load More
-                  </button>
-                </section>
-              </SectionReveal>
-
-              <SectionReveal>
-                <section>
-                  <h2 className="text-5xl font-bold md:text-6xl">
-                    Fixed Departures
-                  </h2>
-                  <article className="mt-5 max-w-[780px] overflow-hidden rounded-[20px] border border-[#e6eaf0] bg-white">
-                    <div className="relative h-[230px]">
-                      <Image
-                        src="https://www.olankatravels.com/assets/home/destinations/Singapore-min.jpg"
-                        alt="Fixed departures tour"
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 1280px) 100vw, 50vw"
-                      />
-                    </div>
-                    <div className="space-y-3 p-5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xl font-medium text-[#3d82f0]">
-                          📍 Sri Lanka
-                        </span>
-                        <span className="rounded-xl bg-[#eaf0fb] px-4 py-1 text-xl">
-                          Fixed Departures
-                        </span>
-                      </div>
-                      <h3 className="text-4xl font-bold">
-                        14 Days Journey Culture and Nature
-                      </h3>
-                      <p className="text-xl text-[#55637b]">
-                        04 Sept 2026. Space for 6 more
+                    {filteredFixedDepartures.length === 0 ? (
+                      <p className="mt-4 text-2xl text-[#55637b]">
+                        No Fixed Departures match your current filters.
                       </p>
-                      <p className="text-xl text-[#55637b]">
-                        Departing Date: 04 Sept 2026
-                      </p>
-                      <p className="text-xl text-[#55637b]">
-                        14 Days 13 Nights
-                      </p>
-                      <p className="text-xl text-[#55637b]">
-                        Double Share Per Person
-                      </p>
-                      <p className="text-xl text-[#55637b]">
-                        Duration: 14 Days
-                      </p>
-                      <p className="text-xl text-[#55637b]">From LKR</p>
-                      <p className="text-5xl font-bold">844,857</p>
-                    </div>
-                  </article>
-                </section>
-              </SectionReveal>
+                    ) : null}
+                  </section>
+                </SectionReveal>
+              ) : null}
             </div>
           </section>
 
           <SectionReveal>
             <section className="rounded-[28px] border border-[#e6eaf0] bg-[#dfe9e2] p-6 md:p-8">
-              <h2 className="text-5xl font-bold md:text-6xl">
+              <h2 className="text-4xl font-bold sm:text-5xl md:text-6xl">
                 3 Vacation Options
               </h2>
-              <p className="mt-3 text-2xl text-[#273344]">
+              <p className="mt-3 text-lg text-[#273344] sm:text-xl md:text-2xl">
                 We will provide a selection of 3 different tour types to suit
                 your preferences
               </p>
 
-              <div className="mt-6 grid gap-5 xl:grid-cols-3">
+              <div className="mt-6 grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
                 {vacationOptions.map((item) => (
                   <article
                     key={item.heading}
                     className="rounded-2xl border border-[#cad5d0] bg-[#dfe9e2] p-5"
                   >
                     <div className="flex gap-2">
-                      <span className="rounded-full bg-white px-4 py-1 text-xl font-semibold">
+                      <span className="rounded-full bg-white px-4 py-1 text-base font-semibold sm:text-lg">
                         {item.badgeA}
                       </span>
                       {item.badgeB ? (
-                        <span className="rounded-full bg-white px-4 py-1 text-xl font-semibold">
+                        <span className="rounded-full bg-white px-4 py-1 text-base font-semibold sm:text-lg">
                           {item.badgeB}
                         </span>
                       ) : null}
                     </div>
-                    <h3 className="mt-4 text-5xl font-bold">{item.heading}</h3>
-                    <p className="mt-5 text-4xl">
+                    <h3 className="mt-4 text-3xl font-bold sm:text-4xl">
+                      {item.heading}
+                    </h3>
+                    <p className="mt-5 text-2xl sm:text-3xl">
                       Starting from <strong>LKR {item.price}</strong> PP
                     </p>
-                    <p className="mt-4 text-xl text-[#324257]">
+                    <p className="mt-4 text-base text-[#324257] sm:text-lg">
                       {item.description}
                     </p>
 
-                    <ul className="mt-4 list-disc space-y-1 pl-6 text-[30px]">
+                    <ul className="mt-4 list-disc space-y-1 pl-6 text-lg sm:text-xl">
                       {item.bullets.map((point) => (
                         <li key={point}>{point}</li>
                       ))}
                     </ul>
 
-                    <div className="mt-5 space-y-2 text-[30px]">
+                    <div className="mt-5 space-y-2 text-lg sm:text-xl">
                       {item.features.map((feature) => (
                         <p
                           key={feature.name}
@@ -485,7 +824,7 @@ export default function ToursPage() {
                       ))}
                     </div>
 
-                    <button className="mt-6 rounded-full bg-[#1fba5f] px-8 py-3 text-2xl font-bold text-white">
+                    <button className="mt-6 w-full rounded-full bg-[#1fba5f] px-8 py-3 text-lg font-bold text-white sm:w-auto sm:text-xl md:text-2xl">
                       Get a Quote
                     </button>
                   </article>
@@ -499,8 +838,10 @@ export default function ToursPage() {
             className="rounded-[28px] border border-[#e6eaf0] bg-white p-6 md:p-8"
           >
             <section>
-              <h2 className="text-5xl font-bold md:text-6xl">People Say</h2>
-              <p className="mt-3 text-2xl text-[#273344]">
+              <h2 className="text-4xl font-bold sm:text-5xl md:text-6xl">
+                People Say
+              </h2>
+              <p className="mt-3 text-lg text-[#273344] sm:text-xl md:text-2xl">
                 Check out what our clients loved about their vacations.
                 Collected via their online reviews and success stories
               </p>
@@ -527,23 +868,25 @@ export default function ToursPage() {
             className="rounded-[28px] border border-[#e6eaf0] bg-white p-6 md:p-8"
           >
             <section>
-              <h2 className="text-5xl font-bold md:text-6xl">
+              <h2 className="text-4xl font-bold sm:text-5xl md:text-6xl">
                 Frequently Asked Questions
               </h2>
-              <p className="mt-3 text-2xl text-[#273344]">
-                Welcome to Olanka Travels! We&apos;re excited to have you with us.
-                For any questions you may have, please explore our FAQ page
+              <p className="mt-3 text-lg text-[#273344] sm:text-xl md:text-2xl">
+                Welcome to Olanka Travels! We&apos;re excited to have you with
+                us. For any questions you may have, please explore our FAQ page
                 where you&apos;ll find helpful answers and information.
               </p>
 
-              <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_420px]">
+              <div className="mt-6 grid gap-5 xl:grid-cols-[1fr_420px]">
                 <div className="space-y-4">
-                  <h3 className="text-4xl font-bold">How Can We Help?</h3>
+                  <h3 className="text-3xl font-bold sm:text-4xl">
+                    How Can We Help?
+                  </h3>
                   <input
-                    className="h-14 w-full rounded-xl border border-[#dbe2ef] px-4 text-xl"
+                    className="h-14 w-full rounded-xl border border-[#dbe2ef] px-4 text-lg sm:text-xl"
                     placeholder="Ask a question"
                   />
-                  <div className="space-y-3 pt-2 text-2xl">
+                  <div className="space-y-3 pt-2 text-lg sm:text-xl md:text-2xl">
                     <details
                       className="rounded-xl border border-[#e7eaf0] p-4"
                       open
@@ -596,5 +939,13 @@ export default function ToursPage() {
 
       <FloatingActions />
     </div>
+  );
+}
+
+export default function ToursPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ToursContent />
+    </Suspense>
   );
 }

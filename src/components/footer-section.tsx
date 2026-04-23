@@ -1,9 +1,9 @@
 export function FooterSection() {
   return (
     <footer className="mt-10 rounded-[32px] bg-[#101722] p-6 text-white md:p-10">
-      <div className="grid gap-8 md:grid-cols-4">
+      <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
         <div>
-          <h3 className="text-3xl font-bold">Olanka Travels</h3>
+          <h3 className="text-2xl font-bold sm:text-3xl">Olanka Travels</h3>
           <p className="mt-4 text-base text-white/85">
             Welcome to Olanka Travels! We are a travel management company that
             provides local experts to plan customised travel itineraries.

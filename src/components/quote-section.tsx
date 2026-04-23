@@ -3,12 +3,14 @@ import { SectionReveal } from "@/components/section-reveal";
 export function QuoteSection() {
   return (
     <SectionReveal
-      className="rounded-[32px] border border-[#e7eaf0] bg-white p-6 md:p-10"
+      className="rounded-[32px] border border-[#e7eaf0] bg-white p-6 md:p-8 lg:p-10"
       id="quote"
     >
       <section>
-        <h2 className="text-5xl font-bold md:text-6xl">Get a Quote</h2>
-        <p className="mt-4 max-w-4xl text-2xl text-[#273344]">
+        <h2 className="text-4xl font-bold sm:text-5xl lg:text-6xl">
+          Get a Quote
+        </h2>
+        <p className="mt-4 max-w-4xl text-lg text-[#273344] sm:text-xl lg:text-2xl">
           Our dedicated team of local experts are available 24/7, ready to
           provide assistance whenever you need it.
         </p>
@@ -46,7 +48,7 @@ export function QuoteSection() {
             Get a personalised quote in 2 hours. We guarantee that your
             information will not be shared with any third parties.
           </p>
-          <button className="h-14 rounded-full bg-[#15bf61] px-8 text-xl font-bold text-white md:w-fit">
+          <button className="h-14 rounded-full bg-[#15bf61] px-8 text-lg font-bold text-white sm:text-xl md:w-fit">
             Submit
           </button>
         </form>

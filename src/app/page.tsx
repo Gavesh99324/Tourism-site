@@ -14,8 +14,8 @@ import { WhyChooseSection } from "@/components/why-choose-section";
 export default function Home() {
   return (
     <div className="relative min-h-screen soft-grid text-[#101722]">
+      <SiteHeader />
       <div className="mx-auto max-w-[1280px] px-3 pb-20 pt-2 md:px-5">
-        <SiteHeader />
         <main className="space-y-8 pt-6 md:space-y-12">
           <HeroSection />
           <HowItWorksSection />

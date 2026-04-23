@@ -37,15 +37,15 @@ export function FeaturesSection() {
   );
 
   return (
-    <SectionReveal className="rounded-[32px] bg-[#dce4f2] p-6 md:p-10">
+    <SectionReveal className="rounded-[32px] bg-[#dce4f2] p-6 md:p-8 lg:p-10">
       <section>
         <div className="space-y-12">
           {visibleFeatures.map((item) => (
             <article
               key={item.title}
-              className="grid gap-4 md:grid-cols-[90px_1fr]"
+              className="grid gap-4 md:grid-cols-[72px_1fr] lg:grid-cols-[90px_1fr]"
             >
-              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-white">
+              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white sm:h-16 sm:w-16">
                 <Image
                   src={item.icon}
                   alt={item.title}
@@ -54,8 +54,10 @@ export function FeaturesSection() {
                 />
               </div>
               <div>
-                <h3 className="text-4xl font-bold">{item.title}</h3>
-                <p className="mt-4 text-2xl leading-relaxed text-[#273344]">
+                <h3 className="text-2xl font-bold sm:text-3xl lg:text-4xl">
+                  {item.title}
+                </h3>
+                <p className="mt-3 text-lg leading-relaxed text-[#273344] sm:mt-4 sm:text-xl lg:text-2xl">
                   {item.desc}
                 </p>
               </div>
@@ -64,7 +66,7 @@ export function FeaturesSection() {
         </div>
         <div className="mt-10 text-center">
           <button
-            className="rounded-full bg-black px-10 py-3 text-2xl font-semibold text-white"
+            className="rounded-full bg-black px-10 py-3 text-lg font-semibold text-white sm:text-xl lg:text-2xl"
             onClick={() => setShowAll((current) => !current)}
           >
             {showAll ? "Show Less" : "Show More"}
